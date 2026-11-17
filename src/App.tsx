@@ -47,6 +47,106 @@ interface Model {
   name: string
 }
 
+const ModelPicker: React.FC<{
+  models: Model[]
+  currentModel: string
+  onChangeModel: (key: string) => void
+}> = ({ models, currentModel, onChangeModel }) => {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const current = models.find(m => m.key === currentModel)
+  const displayName = current?.name ?? currentModel ?? 'model…'
+
+  const filtered = models.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase()) ||
+    m.providerID.toLowerCase().includes(search.toLowerCase()) ||
+    m.modelID.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const openSearch = () => {
+    setOpen(true)
+    setSearch('')
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  const close = () => {
+    setOpen(false)
+    setSearch('')
+  }
+
+  const select = (key: string) => {
+    onChangeModel(key)
+    close()
+  }
+
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) close()
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+    if (open) {
+      document.addEventListener('keydown', onKey)
+      return () => document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div className="model-picker" ref={wrapperRef}>
+      <div className="model-input-wrap">
+        <input
+          ref={inputRef}
+          type="text"
+          value={open ? search : displayName}
+          placeholder={open ? 'Cari model…' : displayName}
+          readOnly={!open}
+          onChange={e => setSearch(e.target.value)}
+          onFocus={() => setOpen(true)}
+          onClick={e => { if (!open) setOpen(true); e.stopPropagation(); }}
+          className="model-input"
+          title={open ? 'Ketik untuk filter, Enter pilih, Esc tutup' : 'Klik ikon 🔍 untuk cari'}
+        />
+        <button
+          className="model-search-btn"
+          type="button"
+          onClick={openSearch}
+          aria-label="Cari model"
+        >
+          🔍
+        </button>
+      </div>
+      {open && (
+        <ul className="model-list" role="listbox">
+          {filtered.length === 0 && (
+            <li className="model-list-empty">Tidak ada model cocok</li>
+          )}
+          {filtered.map(m => (
+            <li
+              key={m.key}
+              role="option"
+              className={m.key === currentModel ? 'selected' : ''}
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => select(m.key)}
+            >
+              <span className="model-name">{m.name}</span>
+              <span className="model-meta">{m.providerID}/{m.modelID}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 // /oc is proxied by vite.config.ts, which resolves the live port and Basic auth
 // per request; the browser never sees either. The base URL must be absolute:
 // the SDK builds request URLs with new URL(path, baseUrl) and throws on a
@@ -65,7 +165,6 @@ export default function App() {
   const [permissions, setPermissions] = useState<Permission[]>([])
   const [agents, setAgents] = useState<Agent[]>([])
   const [models, setModels] = useState<Model[]>([])
-  const [modelSearch, setModelSearch] = useState('')
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -504,30 +603,11 @@ export default function App() {
                     </option>
                   ))}
                 </select>
-                <div className="model-select-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Cari model…"
-                    value={modelSearch}
-                    onChange={e => setModelSearch(e.target.value)}
-                    className="model-search"
-                    title="Filter model by name or provider"
-                  />
-                  <select value={currentModel} onChange={e => changeModel(e.target.value)} title="Model">
-                    <option value="">model…</option>
-                    {models
-                      .filter(m =>
-                        m.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
-                        m.providerID.toLowerCase().includes(modelSearch.toLowerCase()) ||
-                        m.modelID.toLowerCase().includes(modelSearch.toLowerCase())
-                      )
-                      .map(m => (
-                        <option key={m.key} value={m.key}>
-                          {m.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                <ModelPicker
+                  models={models}
+                  currentModel={currentModel}
+                  onChangeModel={changeModel}
+                />
               </div>
             </header>
 

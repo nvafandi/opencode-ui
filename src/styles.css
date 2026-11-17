@@ -184,32 +184,120 @@ body {
   border-color: var(--accent);
 }
 
-.model-select-wrapper {
+.model-picker {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  min-width: 180px;
+  max-width: 280px;
 }
 
-.model-search {
+.model-input-wrap {
+  display: flex;
+  align-items: center;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.model-input-wrap:focus-within {
+  border-color: var(--accent);
+}
+
+.model-input {
+  flex: 1;
+  background: transparent;
+  border: none;
   padding: 6px 10px;
   color: var(--fg);
   font-family: inherit;
   font-size: 0.8rem;
-  max-width: 200px;
-  width: 100%;
-}
-
-.model-search:focus {
   outline: none;
-  border-color: var(--accent);
+  cursor: default;
 }
 
-.model-search::placeholder {
+.model-input[readOnly] {
+  cursor: pointer;
+}
+
+.model-search-btn {
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
   color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.model-search-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--fg);
+}
+
+.model-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  z-index: 100;
+}
+
+.model-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  gap: 8px;
+  min-width: 0;
+}
+
+.model-list li:hover,
+.model-list li.selected {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.model-list li.selected .model-meta {
+  color: var(--bg);
+  opacity: 0.8;
+}
+
+.model-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.model-meta {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.model-list-empty {
+  padding: 12px 10px;
+  text-align: center;
+  color: var(--fg-muted);
+  font-size: 0.8rem;
 }
 
 .messages {
