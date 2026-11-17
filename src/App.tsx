@@ -277,7 +277,9 @@ export default function App() {
       }
     })
 
-    setMessages(mapped)
+    // Sort explicitly ascending so UI renders oldest→newest (independent of server order).
+    // shortcut: server caps limit at 200; no pagination implemented.
+    setMessages(mapped.sort((a, b) => a.createdAt - b.createdAt))
   }
 
   const fetchPermissions = async (sessionId: string) => {
