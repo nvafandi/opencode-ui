@@ -65,6 +65,7 @@ export default function App() {
   const [permissions, setPermissions] = useState<Permission[]>([])
   const [agents, setAgents] = useState<Agent[]>([])
   const [models, setModels] = useState<Model[]>([])
+  const [modelSearch, setModelSearch] = useState('')
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -436,6 +437,7 @@ export default function App() {
 
   const active = sessions.find(s => s.id === activeSessionId)
   const currentModel = active?.model ? `${active.model.providerID}/${active.model.id}` : ''
+  const currentAgent = active?.agent ?? ''
 
   return (
     <div className="app">
@@ -494,7 +496,7 @@ export default function App() {
             <header className="chat-header">
               <h2>{active?.title || 'Session'}</h2>
               <div className="switchers">
-                <select value={active?.agent ?? ''} onChange={e => changeAgent(e.target.value)} title="Agent">
+                <select value={currentAgent} onChange={e => changeAgent(e.target.value)} title="Agent">
                   <option value="">agent…</option>
                   {agents.map(a => (
                     <option key={a.id} value={a.id}>
@@ -502,14 +504,30 @@ export default function App() {
                     </option>
                   ))}
                 </select>
-                <select value={currentModel} onChange={e => changeModel(e.target.value)} title="Model">
-                  <option value="">model…</option>
-                  {models.map(m => (
-                    <option key={m.key} value={m.key}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="model-select-wrapper">
+                  <input
+                    type="text"
+                    placeholder="Cari model…"
+                    value={modelSearch}
+                    onChange={e => setModelSearch(e.target.value)}
+                    className="model-search"
+                    title="Filter model by name or provider"
+                  />
+                  <select value={currentModel} onChange={e => changeModel(e.target.value)} title="Model">
+                    <option value="">model…</option>
+                    {models
+                      .filter(m =>
+                        m.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
+                        m.providerID.toLowerCase().includes(modelSearch.toLowerCase()) ||
+                        m.modelID.toLowerCase().includes(modelSearch.toLowerCase())
+                      )
+                      .map(m => (
+                        <option key={m.key} value={m.key}>
+                          {m.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
             </header>
 

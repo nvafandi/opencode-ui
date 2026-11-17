@@ -184,6 +184,34 @@ body {
   border-color: var(--accent);
 }
 
+.model-select-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-search {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.8rem;
+  max-width: 200px;
+  width: 100%;
+}
+
+.model-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.model-search::placeholder {
+  color: var(--fg-muted);
+}
+
 .messages {
   flex: 1;
   overflow-y: auto;
